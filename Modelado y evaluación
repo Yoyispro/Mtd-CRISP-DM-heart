@@ -1,0 +1,324 @@
+#Todas las bibliotecas que se usaron
+import pandas as pd
+import pandas as pd
+from sklearn.svm import SVC
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score
+
+
+# Cargando los
+data = pd.read_csv('/content/drive/MyDrive/Bases de Datos/heart.csv')
+
+# Preparación de los datos
+X = data.drop('output', axis=1)  # Características
+y = data['output']               # Etiqueta objetivo
+
+# Dividiendo los datos en conjunto de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Modelado con Bosque Aleatorio
+rf_model = RandomForestClassifier(random_state=42)
+rf_model.fit(X_train, y_train)
+rf_predictions = rf_model.predict(X_test)
+
+# Modelado con Máquina de Vectores de Soporte
+svm_model = SVC(random_state=42)
+svm_model.fit(X_train, y_train)
+svm_predictions = svm_model.predict(X_test)
+
+# Evaluación de los modelos
+rf_accuracy = accuracy_score(y_test, rf_predictions)
+rf_f1_score = f1_score(y_test, rf_predictions)
+svm_accuracy = accuracy_score(y_test, svm_predictions)
+svm_f1_score = f1_score(y_test, svm_predictions)
+
+# Resultados
+resultados = {
+    "Random Forest": {
+        "Accuracy": rf_accuracy,
+        "F1 Score": rf_f1_score
+    },
+    "Support Vector Machine": {
+        "Accuracy": svm_accuracy,
+        "F1 Score": svm_f1_score
+    }
+}
+
+resultados
+
+#Determinar con qué características funciona mejro nuestro modelo 
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.feature_selection import RFE
+import matplotlib.pyplot as plt
+
+# Carga de datos
+  # Prfavor usar la ruta correcta del archivo
+heart_data = pd.read_csv('/content/drive/MyDrive/Bases de Datos/heart.csv')
+
+
+X = heart_data.drop('output', axis=1)
+y = heart_data['output']
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+
+rf_model = RandomForestClassifier(random_state=42)
+rf_model.fit(X_train, y_train)
+
+svm_model = SVC(random_state=42)
+svm_model.fit(X_train_scaled, y_train)
+
+
+rf_predictions = rf_model.predict(X_test)
+rf_accuracy = accuracy_score(y_test, rf_predictions)
+rf_report = classification_report(y_test, rf_predictions)
+
+
+svm_predictions = svm_model.predict(X_test_scaled)
+svm_accuracy = accuracy_score(y_test, svm_predictions)
+svm_report = classification_report(y_test, svm_predictions)
+
+feature_importances = rf_model.feature_importances_
+features = X.columns
+feature_importance_df = pd.DataFrame({'Feature': features, 'Importance': feature_importances})
+feature_importance_df = feature_importance_df.sort_values(by='Importance', ascending=False)
+
+
+plt.figure(figsize=(12, 8))
+plt.barh(feature_importance_df['Feature'], feature_importance_df['Importance'])
+plt.xlabel('Importance')
+plt.ylabel('Feature')
+plt.title('Feature Importance in Random Forest Model')
+plt.gca().invert_yaxis()
+plt.show()
+
+
+svm_for_rfe = SVC(kernel='linear', random_state=42)
+rfe = RFE(estimator=svm_for_rfe, n_features_to_select=1, step=1)
+rfe.fit(X_train_scaled, y_train)
+rfe_ranking = rfe.ranking_
+rfe_feature_importance_df = pd.DataFrame({'Feature': features, 'RFE Ranking': rfe_ranking})
+rfe_feature_importance_df = rfe_feature_importance_df.sort_values(by='RFE Ranking')
+
+print(rfe_feature_importance_df)
+
+#Evaluación del modelo con nuestras nuevas características
+# Separar características y variable objetivo
+X = heart_data.drop('output', axis=1)
+y = heart_data['output']
+
+# División de datos en conjuntos de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Seleccionar solo las características especificadas
+selected_features = ['oldpeak', 'thalachh', 'caa', 'cp','thall','age','trtbps']
+
+# Subconjunto de datos con características seleccionadas
+X_train_selected = X_train[selected_features]
+X_test_selected = X_test[selected_features]
+
+# Escalado de características para SVM
+scaler = StandardScaler()
+X_train_selected_scaled = scaler.fit_transform(X_train_selected)
+X_test_selected_scaled = scaler.transform(X_test_selected)
+
+# Entrenar de nuevo los modelos con las características seleccionadas
+# Random Forest
+rf_model_selected = RandomForestClassifier(random_state=42)
+rf_model_selected.fit(X_train_selected, y_train)
+
+# SVM
+svm_model_selected = SVC(random_state=42)
+svm_model_selected.fit(X_train_selected_scaled, y_train)
+
+# Evaluar los modelos seleccionados
+rf_predictions_selected = rf_model_selected.predict(X_test_selected)
+rf_accuracy_selected = accuracy_score(y_test, rf_predictions_selected)
+
+svm_predictions_selected = svm_model_selected.predict(X_test_selected_scaled)
+svm_accuracy_selected = accuracy_score(y_test, svm_predictions_selected)
+
+# Imprimir resultados de precisión
+print("RF Accuracy with Selected Features:", rf_accuracy_selected)
+print("SVM Accuracy with Selected Features:", svm_accuracy_selected)
+
+
+#Visulaización de los resultados de nuestro SVM 
+# Separar características y variable objetivo
+X = heart_data.drop('output', axis=1)
+y = heart_data['output']
+
+# División de datos en conjuntos de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Seleccionar solo las características especificadas
+selected_features = ['oldpeak', 'thalachh', 'caa', 'cp']
+
+# Subconjunto de datos con características seleccionadas
+X_train_selected = X_train[selected_features]
+X_test_selected = X_test[selected_features]
+
+# Escalado de características para SVM
+scaler = StandardScaler()
+X_train_selected_scaled = scaler.fit_transform(X_train_selected)
+X_test_selected_scaled = scaler.transform(X_test_selected)
+
+# Entrenar el modelo SVM con las características seleccionadas
+svm_model_selected = SVC(random_state=42)
+svm_model_selected.fit(X_train_selected_scaled, y_train)
+
+# Realizar predicciones
+svm_predictions_selected = svm_model_selected.predict(X_test_selected_scaled)
+
+# Crear un DataFrame para visualización
+visualization_df = pd.DataFrame({
+    'thalachh': X_test_selected['thalachh'],
+    'oldpeak': X_test_selected['oldpeak'],
+    'Real': y_test,
+    'Predicted': svm_predictions_selected
+})
+
+# Gráfico de dispersión
+plt.figure(figsize=(12, 8))
+
+# Puntos reales
+plt.scatter(visualization_df[visualization_df['Real'] == 0]['thalachh'],
+            visualization_df[visualization_df['Real'] == 0]['oldpeak'],
+            color='blue', label='Real No Disease', alpha=0.5)
+
+plt.scatter(visualization_df[visualization_df['Real'] == 1]['thalachh'],
+            visualization_df[visualization_df['Real'] == 1]['oldpeak'],
+            color='red', label='Real Disease', alpha=0.5)
+
+# Puntos predichos
+plt.scatter(visualization_df[visualization_df['Predicted'] == 0]['thalachh'],
+            visualization_df[visualization_df['Predicted'] == 0]['oldpeak'],
+            color='skyblue', label='Predicted No Disease', marker='x')
+
+plt.scatter(visualization_df[visualization_df['Predicted'] == 1]['thalachh'],
+            visualization_df[visualization_df['Predicted'] == 1]['oldpeak'],
+            color='pink', label='Predicted Disease', marker='x')
+
+plt.title('Real vs Predicted Heart Disease')
+plt.xlabel('Maximum Heart Rate Achieved (thalachh)')
+plt.ylabel('ST Depression Induced by Exercise (oldpeak)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+#Ahora nuestro  bosque aleatorio
+# Separar características y variable objetivo
+X = heart_data.drop('output', axis=1)
+y = heart_data['output']
+
+# División de datos en conjuntos de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Seleccionar solo las características especificadas
+selected_features = ['oldpeak', 'thalachh', 'caa', 'cp']
+
+# Subconjunto de datos con características seleccionadas
+X_train_selected = X_train[selected_features]
+X_test_selected = X_test[selected_features]
+
+# Entrenar el modelo Random Forest con las características seleccionadas
+rf_model_selected = RandomForestClassifier(random_state=42)
+rf_model_selected.fit(X_train_selected, y_train)
+
+# Realizar predicciones
+rf_predictions_selected = rf_model_selected.predict(X_test_selected)
+
+# Crear un DataFrame para visualización
+visualization_df_rf = pd.DataFrame({
+    'thalachh': X_test_selected['thalachh'],
+    'oldpeak': X_test_selected['oldpeak'],
+    'Real': y_test,
+    'Predicted': rf_predictions_selected
+})
+
+# Gráfico de dispersión para Random Forest
+plt.figure(figsize=(12, 8))
+
+# Puntos reales
+plt.scatter(visualization_df_rf[visualization_df_rf['Real'] == 0]['thalachh'],
+            visualization_df_rf[visualization_df_rf['Real'] == 0]['oldpeak'],
+            color='blue', label='Real No Disease', alpha=0.5)
+
+plt.scatter(visualization_df_rf[visualization_df_rf['Real'] == 1]['thalachh'],
+            visualization_df_rf[visualization_df_rf['Real'] == 1]['oldpeak'],
+            color='red', label='Real Disease', alpha=0.5)
+
+# Puntos predichos
+plt.scatter(visualization_df_rf[visualization_df_rf['Predicted'] == 0]['thalachh'],
+            visualization_df_rf[visualization_df_rf['Predicted'] == 0]['oldpeak'],
+            color='lightgreen', label='Predicted No Disease', marker='x')
+
+plt.scatter(visualization_df_rf[visualization_df_rf['Predicted'] == 1]['thalachh'],
+            visualization_df_rf[visualization_df_rf['Predicted'] == 1]['oldpeak'],
+            color='orange', label='Predicted Disease', marker='x')
+
+plt.title('Real vs Predicted Heart Disease (Random Forest)')
+plt.xlabel('Maximum Heart Rate Achieved (thalachh)')
+plt.ylabel('ST Depression Induced by Exercise (oldpeak)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+#Visualización de un mapa de forntera de decisón para dterminar cuales son las variables más importantes
+# Separar características y variable objetivo
+X = heart_data[['thalachh', 'oldpeak']]  # Usando solo 'thalachh' y 'oldpeak'
+y = heart_data['output']
+
+# Escalado de características
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# División de datos en conjuntos de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+# Entrenar el modelo SVM
+svm_model = SVC(kernel='linear', random_state=42)
+svm_model.fit(X_train, y_train)
+
+# Crear una malla para visualizar la frontera de decisión
+h = .02  # Tamaño de paso en la malla
+x_min, x_max = X_train[:, 0].min() - 1, X_train[:, 0].max() + 1
+y_min, y_max = X_train[:, 1].min() - 1, X_train[:, 1].max() + 1
+xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                     np.arange(y_min, y_max, h))
+
+# Predecir las clases para cada punto en la malla
+Z = svm_model.predict(np.c_[xx.ravel(), yy.ravel()])
+Z = Z.reshape(xx.shape)
+
+# Gráfico de dispersión
+plt.figure(figsize=(10, 6))
+plt.contourf(xx, yy, Z, alpha=0.8)
+plt.scatter(X_train[y_train == 0][:, 0], X_train[y_train == 0][:, 1], color='blue', label='No Disease')
+plt.scatter(X_train[y_train == 1][:, 0], X_train[y_train == 1][:, 1], color='red', label='Disease')
+plt.xlabel('Scaled thalachh')
+plt.ylabel('Scaled oldpeak')
+plt.title('SVM Decision Boundary with thalachh and oldpeak')
+plt.legend()
+plt.show()
+
+
+
