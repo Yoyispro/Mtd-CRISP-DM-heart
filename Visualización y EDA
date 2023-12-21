@@ -1,0 +1,115 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+df = pd.read_csv("heart.csv")
+df.isna().sum()
+df
+
+#Visulaizacion general de la distirbución
+X.hist(figsize=(15,10),grid=False)
+plt.show()
+
+#Identificación de valores duplicados
+X.describe().loc[['mean', 'min', 'max', 'std']]
+print(df.duplicated().sum())
+display(df.drop_duplicates(inplace=True))
+print(df.duplicated().sum())
+X =df.iloc[:,:-1]
+y = df.iloc[:,-1]
+
+#Visualización de una matriz de correlacion y ver la relacion entre las variable e identificar multicolinealidad
+plt.figure(2,figsize=(15,15))
+correlation_matrix = df.corr()
+# Visualizar la matriz de correlación usando seaborn
+sns.heatmap(correlation_matrix, annot=True, cmap='viridis', linewidths=.5)
+plt.title('Matriz de Correlación')
+plt.show()
+
+#Analisi de de PCA para dterminar la variabilidad de las variables y detrminar cuales son las más optimas
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+
+# Aplicar PCA para reducir a 3 variables
+pca = PCA(n_components=3)
+pca_result = pca.fit_transform(df)
+
+# Aplicar t-SNE para reducir a 3 variables
+tsne = TSNE(n_components=3, random_state=42)
+tsne_result = tsne.fit_transform(df)
+
+# Visualizar resultados de PCA y t-SNE en 3D
+fig = plt.figure(figsize=(12, 6))
+
+# Subplot para PCA
+ax1 = fig.add_subplot(121, projection='3d')
+for i in range(2):
+    data = pca_result[y == i]
+    ax1.scatter(data[:, 0], data[:, 1], data[:, 2], marker='o' if i==0 else 'x')
+ax1.set_title('Reducción a 3D con PCA')
+ax1.set_xlabel('PC1')
+ax1.set_ylabel('PC2')
+ax1.set_zlabel('PC3')
+ax1.legend(["Clase 0","Clase 1"])
+
+# Subplot para t-SNE
+ax2 = fig.add_subplot(122, projection='3d')
+for i in range(2):
+    data = tsne_result[y == i]
+    ax2.scatter(data[:, 0], data[:, 1], data[:, 2], marker='o' if i==0 else 'x')
+ax2.set_title('Reducción a 3D con t-SNE')
+ax2.set_xlabel('t-SNE Componente 1')
+ax2.set_ylabel('t-SNE Componente 2')
+ax2.set_zlabel('t-SNE Componente 3')
+ax2.legend(["Clase 0","Clase 1"])
+
+plt.tight_layout()
+plt.show()
+
+#Uso de diagrmas de caja para la visualización de valores aípicos que puedan comprometer futuros pasos
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+plt.figure(3,figsize=(10, 6))
+X.boxplot()
+plt.title('Diagrama de Cajas')
+plt.show()
+
+#Diagramas que nos permiten ver aun a mas detalle la distribución de dos variables antepuestas
+
+sns.set(style="ticks")
+
+# Obtener la cantidad de características en el DataFrame
+num_features = len(df.columns) - 1  # Excluir la columna de salida
+
+# Calcular el número de filas y columnas para subgráficos
+num_rows = (num_features // 2) + (num_features % 2)
+num_cols = 2
+
+# Crear subgráficos en una sola figura
+fig, axes = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(12, num_rows * 4))
+fig.suptitle('Diagramas de Pares por Característica y Salida', y=1.02)
+
+# Iterar sobre las características y crear gráficos de distribución en subgráficos
+for i, feature in enumerate(df.columns[:-1]):  # Excluir la columna de salida
+    row, col = divmod(i, num_cols)
+    sns.histplot(df, x=feature, hue='output', kde=True, element="step", common_norm=False, ax=axes[row, col], palette="husl")
+    axes[row, col].set_title(f'Distribución de {feature}')
+
+# Ajustar el diseño
+plt.tight_layout()
+plt.show()
+
+#De nuestro analisis de PCA Graficamos en un subplot las 3 columnas com mayor corrlación
+fig = plt.figure(figsize=(12, 6))
+
+# Subplot para PCA
+ax1 = fig.add_subplot(121, projection='3d')
+for i in range(2):
+    data = df[y == i]
+    ax1.scatter(data.iloc[:, 2], data.iloc[:, 7], data.iloc[:, 10], marker='o' if i==0 else 'x')
+ax1.set_title('3 columnas con mayor correlación')
+ax1.set_xlabel('cp')
+ax1.set_ylabel('thalachh')
+ax1.set_zlabel('sip')
+ax1.legend(["Clase 0","Clase 1"])
