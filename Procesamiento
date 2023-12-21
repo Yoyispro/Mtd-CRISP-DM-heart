@@ -1,0 +1,57 @@
+#Escalamiento y transfromacion de una de las avriables categoricas de mayor importancia
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+df = pd.read_csv("heart.csv")
+
+X = df.drop("output", axis=1)
+y = df["output"]
+
+#transformador para aplicar preprocesamiento solo pa cp
+preprocessor = OneHotEncoder(sparse=False, drop='first')
+
+#pipeline con el preprocesamiento
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    #Se puede agregar un clasificador como este:  ('classifier', classifier)
+    #por lo que vi servia pa hacer predicciones sobre nuevas instancias que no formaban parte del conjunto, asi decia
+    ]
+
+
+#ajusto el pipeline a los datos
+pipeline.fit(X[["cp"]])
+
+#preprocesamiento a la variable "cp"
+X_preprocessed = pipeline.transform(X[["cp"]])
+
+#conjunto de datos preprocesado
+print(pd.DataFrame(X_preprocessed).head())
+
+#Uso de técnica alternativa para ver como arroja los resultados.
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+df = pd.read_csv("heart.csv")
+
+X = df.drop("output", axis=1)
+y = df["output"]
+
+preprocessor = OneHotEncoder(sparse=False, drop='first')
+
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+])
+
+pipeline.fit(X[["cp"]])
+
+X_preprocessed = pipeline.transform(X[["cp"]])
+
+df_preprocessed = pd.DataFrame(X_preprocessed, columns=[f"cp_{i}" for i in range(X_preprocessed.shape[1])])
+
+X_final = pd.concat([X.drop("cp", axis=1), df_preprocessed], axis=1)
+
+print(X_final.head())
